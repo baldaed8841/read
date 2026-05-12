@@ -58,22 +58,28 @@ class ArticleViewModel extends ChangeNotifier {
 
 class ArticleWidget extends StatelessWidget {
   final Summary summary;
-  const ArticleWidget({super.key,required this.summary});
+  const ArticleWidget({super.key, required this.summary});
   Widget build(BuildContext context) {
     return Padding(
-      padding:EdgeInsetsGeometry.all(8.0),
+      padding: EdgeInsetsGeometry.all(8.0),
       child: Column(
         spacing: 10,
         children: [
-        if (summary.hasImage) Image.network(summary.originalImage.source)
-      ]
-      Text(
-        summary.tiles.normalized,
-        overflow: Overflow.eclipsis,
-        style: Theme.of(context).textTheme.displaySmall
+          if (summary.hasImage) Image.network(summary.originalImage.source),
+          Text(
+            summary.tiles.normalized,
+            overflow: TextOverflow.eclipsis,
+            style: Theme.of(context).textTheme.displaySmall,
+          ),
+          if (summary.description != null)
+            Text(
+              contextsummary.description!,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.displaySmall,
+            ),
+          Text(summary.extract),
+        ],
       ),
-      
-      )
-       )
+    );
   }
 }
