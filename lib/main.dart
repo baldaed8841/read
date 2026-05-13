@@ -10,7 +10,6 @@ void main() {
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
@@ -19,7 +18,7 @@ class MainApp extends StatelessWidget {
   }
 }
 
-class ArticleModel {
+class ArticleModel { 
   Future<Summary> getRandomArticle() async {
     final uri = Uri.https(
       'en.wikipedia.com',
@@ -88,4 +87,36 @@ class ArticleWidget extends StatelessWidget {
 class ArticlePage extends StatelessWidget {
   final Summary summary;
   final VoidCallback nextArticle;
+ const ArticlePage({super.key, required this.summary, required this.nextArticle});
+@override
+  Widget build (BuildContext context) {
+    return SingleChildScrollView(
+    child: Column(
+      children: [
+        ArticleWidget(summary: summary),
+        ElevatedButton(onPressed: nextArticle, child: Text("Next Article"),)
+     ],
+    ),
+  );
+ }
+}
+
+class ArticleView extends StatefulWidget {
+  const ArticleView({super.key})
+  State<ArticleView> createState()=> _ArticleViewState();
+}
+
+class _ArticleViewState extends State<ArticleView> {
+final viewModel =  ArticleViewMovel(ArticleModel)();
+@override
+void initState() {
+    super.initState();
+    viewModel.fetchArticle();
+}
+
+Widget build(BuildContext context) {
+return Scaffold(
+  
+)
+}
 }
