@@ -102,12 +102,13 @@ class ArticlePage extends StatelessWidget {
 }
 
 class ArticleView extends StatefulWidget {
-  const ArticleView({super.key})
+  const ArticleView({super.key});
+  @override
   State<ArticleView> createState()=> _ArticleViewState();
 }
 
 class _ArticleViewState extends State<ArticleView> {
-final viewModel =  ArticleViewMovel(ArticleModel)();
+final viewModel =  ArticleViewModel(ArticleModel());
 @override
 void initState() {
     super.initState();
@@ -116,7 +117,21 @@ void initState() {
 
 Widget build(BuildContext context) {
 return Scaffold(
-  
+body: Center(
+  child:ListenableBuilder(
+    listenable: viewModel,
+     builder:_,context){
+      return swith((
+        viewModel.isLoading
+        viewModel.Summary
+        viewModel.error
+      )) {
+        (true,_,_) => CircularProgressIndicator(),
+        (_,_,Exception error) => Text('error $e'),
+        (_,Summary summary, _) => ArticlePage(summary: summary, nextArticle: viewModel)
+      }
+     }
+  )
 )
 }
 }
