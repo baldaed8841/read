@@ -3,6 +3,7 @@ import 'summary.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:http/http.dart';
+import 'package:wiki_reader/data/repositories/random_article_repository.dart';
 
 void main() {
   runApp(const MainApp());
@@ -10,18 +11,17 @@ void main() {
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: Center(child: Text('Hello World!'))),
-    );
+    return MaterialApp(home: ArticleView());
   }
 }
 
-class ArticleModel { 
+class ArticleModel {
   Future<Summary> getRandomArticle() async {
     final uri = Uri.https(
-      'en.wikipedia.com',
+      'ru.wikipedia.org',
       'api/rest_v1/page/random/summary',
     );
     final response = await get(uri);
@@ -33,7 +33,7 @@ class ArticleModel {
 }
 
 class ArticleViewModel extends ChangeNotifier {
-  final ArticleModel model;
+  final RandomArticleRepository model;
   Summary? summary;
   Exception? error;
   bool isLoading = false;
@@ -61,7 +61,7 @@ class ArticleWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsGeometry.all(8.0),
+      padding: EdgeInsets.all(8.0),
       child: Column(
         spacing: 10,
         children: [
@@ -87,51 +87,69 @@ class ArticleWidget extends StatelessWidget {
 class ArticlePage extends StatelessWidget {
   final Summary summary;
   final VoidCallback nextArticle;
- const ArticlePage({super.key, required this.summary, required this.nextArticle});
-@override
-  Widget build (BuildContext context) {
+  ArticlePage({super.key, required this.summary, required this.nextArticle});
+  @override
+  Widget build(BuildContext context) {
     return SingleChildScrollView(
-    child: Column(
-      children: [
-        ArticleWidget(summary: summary),
-        ElevatedButton(onPressed: nextArticle, child: Text("Next Article"),)
-     ],
-    ),
-  );
- }
+      child: Column(
+        children: [
+          ArticleWidget(summary: summary),
+          //ElevatedButton(onPressed: nextArticle, child: Text("Next Article")),
+        ],
+      ),
+    );
+  }
 }
 
 class ArticleView extends StatefulWidget {
   const ArticleView({super.key});
-  @override
-  State<ArticleView> createState()=> _ArticleViewState();
+  State<ArticleView> createState() => _ArticleViewState();
 }
 
 class _ArticleViewState extends State<ArticleView> {
-final viewModel =  ArticleViewModel(ArticleModel());
-@override
-void initState() {
+  final viewModel = ArticleViewModel(RandomArticleRepository());
+  @override
+  void initState() {
     super.initState();
     viewModel.fetchArticle();
-}
+  }
 
-Widget build(BuildContext context) {
-return Scaffold(
-body: Center(
-  child:ListenableBuilder(
-    listenable: viewModel,
-     builder:_,context){
-      return swith((
-        viewModel.isLoading
-        viewModel.Summary
-        viewModel.error
-      )) {
-        (true,_,_) => CircularProgressIndicator(),
-        (_,_,Exception error) => Text('error $e'),
-        (_,Summary summary, _) => ArticlePage(summary: summary, nextArticle: viewModel)
-      }
-     }
-  )
-)
-}
+  Widget build(BuildContext context) {
+    return Scaffold(
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: SizedBox(
+        height: 40,
+        width: 100,
+        child: FloatingActionButton(
+          child: Text("Next Article"),
+          onPressed: () => setState(() {
+            viewModel.fetchArticle();
+          }),
+        ),
+      ),
+      // appBar: AppBar(
+      //   title: ,
+      // ),
+      body: Center(
+        child: ListenableBuilder(
+          listenable: viewModel,
+          builder: (_, context) {
+            return switch ((
+              viewModel.isLoading,
+              viewModel.summary,
+              viewModel.error,
+            )) {
+              (true, _, _) => CircularProgressIndicator(),
+              (_, _, Exception e) => Text('error $e'),
+              (_, Summary summary, _) => ArticlePage(
+                summary: viewModel.summary!,
+                nextArticle: viewModel.fetchArticle,
+              ),
+              _ => Text("Something went wrong"),
+            };
+          },
+        ),
+      ),
+    );
+  }
 }
